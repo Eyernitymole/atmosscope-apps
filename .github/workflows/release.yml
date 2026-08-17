@@ -1,0 +1,127 @@
+name: Build and release AtmosScope apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the v prefix
+        required: true
+        default: 1.0.0
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Validate version
+        env:
+          APP_VERSION: ${{ inputs.version }}
+        run: '[[ "$APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
+      - name: Restore signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: printenv ANDROID_KEYSTORE_BASE64 | base64 --decode > "$RUNNER_TEMP/atmosscope-release.jks"
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/atmosscope-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          APP_VERSION: ${{ inputs.version }}
+        run: gradle --no-daemon :app:assembleRelease
+      - name: Verify and stage APK
+        run: |
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
+          mkdir -p artifacts
+          cp android/app/build/outputs/apk/release/app-release.apk artifacts/AtmosScope-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: artifacts/AtmosScope-Android.apk
+          if-no-files-found: error
+
+  windows:
+    name: Windows Setup
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Validate version
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ inputs.version }}
+        run: |
+          if ($env:APP_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must use x.y.z' }
+      - name: Publish self-contained Windows app
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ inputs.version }}
+        run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+      - name: Build Windows installer
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ inputs.version }}
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=$env:APP_VERSION" windows/installer/AtmosScope.iss
+          if (-not (Test-Path artifacts/AtmosScope-Windows-Setup.exe)) { throw 'Installer output missing' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: artifacts/AtmosScope-Windows-Setup.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: android-release
+          path: release-assets
+      - uses: actions/download-artifact@v5
+        with:
+          name: windows-release
+          path: release-assets
+      - name: Generate checksums
+        working-directory: release-assets
+        run: sha256sum AtmosScope-Android.apk AtmosScope-Windows-Setup.exe > SHA256SUMS.txt
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "v$VERSION" \
+            release-assets/AtmosScope-Android.apk \
+            release-assets/AtmosScope-Windows-Setup.exe \
+            release-assets/SHA256SUMS.txt \
+            --title "AtmosScope v$VERSION" \
+            --notes "Android APK 与 Windows 安装程序。Windows 首版未使用商业代码签名证书，系统可能显示 SmartScreen 提示。"
