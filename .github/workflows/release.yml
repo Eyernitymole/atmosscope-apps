@@ -8,12 +8,16 @@ on:
         required: true
         default: 1.0.0
         type: string
+  push:
+    branches: [main]
+    paths:
+      - .release-version
 
 permissions:
   contents: read
 
 concurrency:
-  group: native-release-${{ inputs.version }}
+  group: native-release-${{ inputs.version || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -34,7 +38,7 @@ jobs:
           gradle-version: "8.13"
       - name: Validate version
         env:
-          APP_VERSION: ${{ inputs.version }}
+          APP_VERSION: ${{ inputs.version || '1.0.0' }}
         run: '[[ "$APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
       - name: Restore signing key
         env:
@@ -48,7 +52,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_VERSION_CODE: ${{ github.run_number }}
-          APP_VERSION: ${{ inputs.version }}
+          APP_VERSION: ${{ inputs.version || '1.0.0' }}
         run: gradle --no-daemon :app:assembleRelease
       - name: Verify and stage APK
         run: |
@@ -72,13 +76,13 @@ jobs:
       - name: Validate version
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version }}
+          APP_VERSION: ${{ inputs.version || '1.0.0' }}
         run: |
           if ($env:APP_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must use x.y.z' }
       - name: Publish self-contained Windows app
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version }}
+          APP_VERSION: ${{ inputs.version || '1.0.0' }}
         run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
       - name: Install Inno Setup
         shell: pwsh
@@ -86,7 +90,7 @@ jobs:
       - name: Build Windows installer
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version }}
+          APP_VERSION: ${{ inputs.version || '1.0.0' }}
         run: |
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=$env:APP_VERSION" windows/installer/AtmosScope.iss
           if (-not (Test-Path artifacts/AtmosScope-Windows-Setup.exe)) { throw 'Installer output missing' }
@@ -117,7 +121,7 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ inputs.version || '1.0.0' }}
         run: |
           gh release create "v$VERSION" \
             release-assets/AtmosScope-Android.apk \
