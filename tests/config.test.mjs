@@ -52,4 +52,5 @@ test("release workflow builds signed Android and Windows artifacts with checksum
   assert.match(workflow, /AtmosScope-Windows-Setup\.exe/);
   assert.match(workflow, /SHA256SUMS\.txt/);
   assert.match(workflow, /gh release create/);
+  assert.match(workflow, /--repo "\$GITHUB_REPOSITORY"/);
 });
