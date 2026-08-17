@@ -127,5 +127,6 @@ jobs:
             release-assets/AtmosScope-Android.apk \
             release-assets/AtmosScope-Windows-Setup.exe \
             release-assets/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
             --notes "Android APK 与 Windows 安装程序。Windows 首版未使用商业代码签名证书，系统可能显示 SmartScreen 提示。"
