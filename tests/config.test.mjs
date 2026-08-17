@@ -36,7 +36,10 @@ test("release workflow builds signed Android and Windows artifacts with checksum
   const workflow = read(".github/workflows/release.yml");
 
   assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /push:/);
+  assert.match(workflow, /\.release-version/);
   assert.match(workflow, /version:/);
+  assert.match(workflow, /inputs\.version \|\| '1\.0\.0'/);
   assert.match(workflow, /contents: write/);
   assert.match(workflow, /android:/);
   assert.match(workflow, /windows:/);
