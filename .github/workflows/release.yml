@@ -151,4 +151,4 @@ jobs:
             release-assets/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
-            --notes "新增专业图集：天气雷达、模式云场、未来 72 小时累计降水、850 hPa 风场、500 hPa 高度与温度场、模式探空图。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
+            --notes "专业图集 V3：按实况监测、高空形势、降水预报、强对流诊断、模式探空和动力诊断组织产品；新增 850 hPa 温度与风、850/700 hPa 相对湿度、海平面气压、500 hPa + 海平面气压、500 hPa + 850 hPa 温风和 CAPE 强对流诊断。保留天气雷达、模式云场、72 小时累计降水、850 hPa 风场、500 hPa 高度与温度场、Skew-T 模式探空。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
