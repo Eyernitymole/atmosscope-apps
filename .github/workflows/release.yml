@@ -6,7 +6,7 @@ on:
       version:
         description: Release version without the v prefix
         required: true
-        default: 1.0.0
+        default: 1.1.0
         type: string
   push:
     branches: [main]
@@ -36,9 +36,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
+      - name: Run repository checks
+        run: npm test
       - name: Validate version
         env:
-          APP_VERSION: ${{ inputs.version || '1.0.0' }}
+          APP_VERSION: ${{ inputs.version || '1.1.0' }}
         run: '[[ "$APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
       - name: Restore signing key
         env:
@@ -52,7 +54,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_VERSION_CODE: ${{ github.run_number }}
-          APP_VERSION: ${{ inputs.version || '1.0.0' }}
+          APP_VERSION: ${{ inputs.version || '1.1.0' }}
         run: gradle --no-daemon :app:assembleRelease
       - name: Verify and stage APK
         run: |
@@ -76,13 +78,13 @@ jobs:
       - name: Validate version
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version || '1.0.0' }}
+          APP_VERSION: ${{ inputs.version || '1.1.0' }}
         run: |
           if ($env:APP_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must use x.y.z' }
       - name: Publish self-contained Windows app
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version || '1.0.0' }}
+          APP_VERSION: ${{ inputs.version || '1.1.0' }}
         run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
       - name: Install Inno Setup
         shell: pwsh
@@ -90,7 +92,7 @@ jobs:
       - name: Build Windows installer
         shell: pwsh
         env:
-          APP_VERSION: ${{ inputs.version || '1.0.0' }}
+          APP_VERSION: ${{ inputs.version || '1.1.0' }}
         run: |
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=$env:APP_VERSION" windows/installer/AtmosScope.iss
           if (-not (Test-Path artifacts/AtmosScope-Windows-Setup.exe)) { throw 'Installer output missing' }
@@ -121,7 +123,7 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.version || '1.0.0' }}
+          VERSION: ${{ inputs.version || '1.1.0' }}
         run: |
           gh release create "v$VERSION" \
             release-assets/AtmosScope-Android.apk \
@@ -129,4 +131,4 @@ jobs:
             release-assets/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
-            --notes "Android APK 与 Windows 安装程序。Windows 首版未使用商业代码签名证书，系统可能显示 SmartScreen 提示。"
+            --notes "新增专业图集：天气雷达、模式云场、未来 72 小时累计降水、850 hPa 风场、500 hPa 高度与温度场、模式探空图。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
