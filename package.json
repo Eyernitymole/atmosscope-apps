@@ -1,9 +1,9 @@
 {
   "name": "atmosscope-apps",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/config.test.mjs"
+    "test": "node --test tests/*.test.mjs"
   }
 }
