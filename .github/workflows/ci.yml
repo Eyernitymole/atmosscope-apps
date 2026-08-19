@@ -1,0 +1,31 @@
+name: Validate AtmosScope
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - web/**
+      - tests/**
+      - package.json
+      - android/**
+      - windows/**
+      - .github/workflows/ci.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node tests and syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Run repository tests
+        run: npm test
+      - name: Check JavaScript module syntax
+        run: find web -maxdepth 1 -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
