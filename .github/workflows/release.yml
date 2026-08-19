@@ -35,6 +35,11 @@ jobs:
         run: |
           FILE_VERSION="$(tr -d '\r\n ' < .release-version)"
           VERSION="${INPUT_VERSION:-$FILE_VERSION}"
+          echo "event=$GITHUB_EVENT_NAME"
+          echo "sha=$GITHUB_SHA"
+          echo "file_version=$FILE_VERSION"
+          echo "input_version=${INPUT_VERSION:-<empty>}"
+          echo "resolved_version=$VERSION"
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Release version must use x.y.z"
             exit 1
@@ -151,4 +156,4 @@ jobs:
             release-assets/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
-            --notes "专业图集 V3：按实况监测、高空形势、降水预报、强对流诊断、模式探空和动力诊断组织产品；新增 850 hPa 温度与风、850/700 hPa 相对湿度、海平面气压、500 hPa + 海平面气压、500 hPa + 850 hPa 温风和 CAPE 强对流诊断。保留天气雷达、模式云场、72 小时累计降水、850 hPa 风场、500 hPa 高度与温度场、Skew-T 模式探空。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
+            --notes "专业图集 V4：在 V3 基础上新增 700/500 hPa 模式原生垂直速度、850 hPa 派生涡度、200 hPa 派生散度和 JMA/RSMC Tokyo 台风专题入口。涡度与散度由真实模式风场在采样网格上采用球面有限差分派生，并明确标记为诊断产品；不伪造台风路径。保留全部 V3 雷达、模式场、降水、强对流和探空功能。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
