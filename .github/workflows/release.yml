@@ -12,6 +12,7 @@ on:
     paths:
       - .release-version
       - .github/workflows/release.yml
+      - tests/**
 
 permissions:
   contents: read
