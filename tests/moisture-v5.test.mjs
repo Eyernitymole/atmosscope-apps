@@ -17,7 +17,10 @@ test("V5 derives moisture flux from real temperature RH pressure and wind fields
 
 test("V5 vertical section requests multiple pressure levels along an interpolated transect",()=>{
   const a=read("web/moisture.mjs");
-  for(const p of [1000,925,850,700,600,500,400,300,250,200]) assert.match(a,new RegExp(`temperature_${p}hPa`));
+  assert.match(a,/LEVELS=\[1000,925,850,700,600,500,400,300,250,200\]/);
+  assert.match(a,/temperature_\$\{p\}hPa/);
+  assert.match(a,/relative_humidity_\$\{p\}hPa/);
+  assert.match(a,/vertical_velocity_\$\{p\}hPa/);
   assert.match(a,/sectionPoints/);
   assert.match(a,/Plotly\.react/);
 });
