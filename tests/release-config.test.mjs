@@ -12,7 +12,8 @@ test("release workflow resolves automatic versions from .release-version", () =>
   assert.doesNotMatch(workflow, /inputs\.version \|\| '1\.1\.0'/);
 });
 
-test("editing the release workflow triggers a rebuild and duplicate tags fail early", () => {
+test("release workflow retriggers for workflow or test fixes and duplicate tags fail early", () => {
   assert.match(workflow, /- \.github\/workflows\/release\.yml/);
+  assert.match(workflow, /- tests\/\*\*/);
   assert.match(workflow, /git ls-remote --exit-code --tags origin "refs\/tags\/v\$VERSION"/);
 });
