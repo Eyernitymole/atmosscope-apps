@@ -10,13 +10,8 @@ android {
         applicationId = "com.atmosscope.weather"
         minSdk = 24
         targetSdk = 36
-        versionCode = providers.environmentVariable("ANDROID_VERSION_CODE")
-            .orElse("1")
-            .get()
-            .toInt()
-        versionName = providers.environmentVariable("APP_VERSION")
-            .orElse("1.0.0")
-            .get()
+        versionCode = providers.environmentVariable("ANDROID_VERSION_CODE").orElse("1").get().toInt()
+        versionName = providers.environmentVariable("APP_VERSION").orElse("1.1.0").get()
     }
 
     signingConfigs {
@@ -38,12 +33,12 @@ android {
         }
     }
 
+    sourceSets {
+        getByName("main").assets.srcDir(rootProject.file("../web"))
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-dependencies {
-    implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.7.3")
 }
