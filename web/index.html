@@ -1,1 +1,29 @@
-<!-- V1.6 consultation entry marker -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1b2b" />
+  <title>天衡气象 · 专业图集</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dynamics.css" />
+  <link rel="stylesheet" href="moisture.css" />
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar"><h1>天衡气象 · 专业图集</h1></header>
+<nav class="product-groups">
+<section class="product-group"><h3>水汽与会商</h3><div class="product-tabs"><button class="moisture-tab" data-moisture="moistureFlux850">850 hPa 水汽通量</button><button class="moisture-tab" data-moisture="consultationComposite">综合会商</button></div></section>
+<!-- Existing V5 product groups remain loaded by application modules -->
+</nav>
+<main class="workspace"><section class="map-card"><div id="map"></div><div id="moistureMap" class="hidden"></div></section></main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script type="module" src="app.js"></script>
+<script type="module" src="dynamics.mjs"></script>
+<script type="module" src="moisture.mjs"></script>
+<script type="module" src="consultation.mjs"></script>
+</body>
+</html>
