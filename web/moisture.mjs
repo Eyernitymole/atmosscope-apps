@@ -190,6 +190,7 @@ document.querySelectorAll('.moisture-tab').forEach(button=>button.addEventListen
 }));
 document.querySelectorAll('.product-tab,.dynamic-tab').forEach(button=>button.addEventListener('click',()=>{
   ++requestGeneration;
+  document.querySelectorAll('.moisture-tab').forEach(item=>item.classList.remove('active'));
   clearMoistureOverlays();
   $('moistureMap').classList.add('hidden');
   $('sectionChart').classList.add('hidden');

@@ -32,7 +32,8 @@ async function until(predicate){
   assert.ok(predicate(),'the UI did not settle as expected');
 }
 
-async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeApp=false}={}){
+async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeApp=false,
+  includeDynamics=false}={}){
   const classes=()=>{
     const values=new Set();
     return {add:value=>values.add(value),remove:value=>values.delete(value),
@@ -41,9 +42,13 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeAp
   const node=()=>({classList:classes(),textContent:'',innerHTML:'',value:'0',
     style:{},selectedOptions:[{textContent:'CMA GRAPES'}],handlers:{},
     append(){},
-    addEventListener(name,handler){this.handlers[name]=handler}});
+    addEventListener(name,handler){
+      const earlier=this.handlers[name];
+      this.handlers[name]=earlier?event=>{earlier(event);handler(event)}:handler;
+    }});
   const consultation={...node(),dataset:{moisture:'consultationComposite'}};
   const ordinary={...node(),dataset:{moisture:ordinaryName}};
+  const dynamic={...node(),dataset:{dynamic:'omega700'}};
   const product={...node(),dataset:{product:'radar'}};
   if(includeNativeApp)product.classList.add('active');
   const elements=new Map();
@@ -53,13 +58,17 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeAp
   globalThis.document={
     getElementById:get,
     querySelectorAll:selector=>selector==='.moisture-tab'?[consultation,ordinary]:
+      selector==='.dynamic-tab'?[dynamic]:
       selector==='.product-tab'?[product]:
-      selector==='.product-tab,.dynamic-tab'?[product]:
-      selector==='.product-tab,.dynamic-tab,.moisture-tab'?[product,consultation,ordinary]:[],
+      selector==='.product-tab,.dynamic-tab'?[product,dynamic]:
+      selector==='.product-tab,.dynamic-tab,.moisture-tab'?
+        [product,dynamic,consultation,ordinary]:[],
     querySelector:selector=>selector==='.moisture-tab.active'?
       [consultation,ordinary].find(button=>button.classList.contains('active'))||null:
       selector==='.product-tab.active'?
         (product.classList.contains('active')?product:null):
+      selector==='.dynamic-tab.active'?
+        (dynamic.classList.contains('active')?dynamic:null):
       selector==='.moisture-tab.active,.dynamic-tab.active'?
         [consultation,ordinary].find(button=>button.classList.contains('active'))||null:null,
     createElement:()=>({width:0,height:0,toDataURL:()=>'',
@@ -79,8 +88,9 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeAp
   const requests=[];
   globalThis.fetch=url=>{requests.push(new URL(url));return fetchImpl(url)};
   if(includeNativeApp)await import(`../web/app.js?ui-${++nextImport}`);
+  if(includeDynamics)await import(`../web/dynamics.mjs?ui-${++nextImport}`);
   await import(`../web/moisture.mjs?ui-${++nextImport}`);
-  return {consultation,ordinary,product,get,added,removed,requests,
+  return {consultation,ordinary,dynamic,product,get,added,removed,requests,
     badge:get('statusBadge'),notes:get('productNotes')};
 }
 
@@ -228,6 +238,27 @@ test('an abandoned vertical section does not request omega or restore its chart'
   assert.equal(resolvers.length,2);
   assert.equal(ui.get('productTitle').textContent,'综合会商');
   assert.ok(ui.get('sectionChart').classList.contains('hidden'));
+});
+
+test('dynamics and consultation requests cannot repaint each other',async()=>{
+  const resolvers=[];
+  const ui=await harness(()=>new Promise(resolve=>resolvers.push(resolve)),
+    {includeDynamics:true});
+  ui.dynamic.handlers.click();
+  ui.consultation.handlers.click();
+  assert.equal(resolvers.length,2);
+  resolvers[1](response(2));
+  await until(()=>ui.badge.textContent==='数据已更新');
+  const rasterCount=ui.added.filter(item=>item.kind==='raster').length;
+  const visibleTime=ui.get('validTime').textContent;
+  resolvers[0](response(1));
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(ui.added.filter(item=>item.kind==='raster').length,rasterCount);
+  assert.equal(ui.get('validTime').textContent,visibleTime);
+  ui.dynamic.handlers.click();
+  assert.equal(ui.consultation.classList.contains('active'),false);
+  ui.get('modelSelect').handlers.change();
+  assert.equal(resolvers.length,4,'model changes should reload only the selected dynamic product');
 });
 
 test('switching to an original product invalidates a pending consultation request',async()=>{
