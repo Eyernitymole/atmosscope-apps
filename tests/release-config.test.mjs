@@ -17,3 +17,10 @@ test("release workflow retriggers for workflow or test fixes and duplicate tags 
   assert.match(workflow, /- tests\/\*\*/);
   assert.match(workflow, /git ls-remote --exit-code --tags origin "refs\/tags\/v\$VERSION"/);
 });
+
+test('1.6.0 source and release versions agree',()=>{
+  const file=readFileSync(new URL('../.release-version',import.meta.url),'utf8').trim();
+  const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
+  assert.equal(file,'1.6.0');
+  assert.equal(pkg.version,file);
+});

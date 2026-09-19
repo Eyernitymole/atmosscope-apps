@@ -5,8 +5,10 @@ import test from "node:test";
 const source=readFileSync(new URL("../web/moisture.mjs",import.meta.url),"utf8");
 
 test("vertical section degrades gracefully when vertical velocity is unavailable",()=>{
-  assert.match(source,/try\s*\{[^}]*vertical_velocity_/s);
-  assert.match(source,/catch\s*\([^)]*\)\s*\{[^}]*垂直速度/s);
+  assert.match(source,/function sectionOmegaVars\(\)\s*\{[^}]*vertical_velocity_/s);
+  assert.match(source,/try\s*\{\s*const omegaRes=await request\(lats,lons,sectionOmegaVars\(\)\)/s);
+  assert.match(source,/catch\s*\([^)]*\)\s*\{/s);
+  assert.match(source,/omegaNote='当前模式\/层次的垂直速度字段不可用/);
   assert.match(source,/omegaAvailable/);
 });
 

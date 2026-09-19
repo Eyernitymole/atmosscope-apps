@@ -8,12 +8,13 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="consultation.css" />
   <link rel="stylesheet" href="dynamics.css" />
   <link rel="stylesheet" href="moisture.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar"><div><p class="eyebrow">ATMOSSCOPE / PROFESSIONAL V5</p><h1>天衡气象 · 专业图集</h1><p class="subline">真实雷达 + 数值模式场；按天气会商流程组织，不生成伪造气象图。</p></div><div id="statusBadge" class="status-badge">准备就绪</div></header>
+    <header class="topbar"><div><p class="eyebrow">ATMOSSCOPE / PROFESSIONAL V1.6</p><h1>天衡气象 · 专业图集</h1><p class="subline">真实雷达 + 数值模式场；按天气会商流程组织，不生成伪造气象图。</p></div><div id="statusBadge" class="status-badge">准备就绪</div></header>
     <nav class="product-groups" aria-label="专业气象产品">
       <section class="product-group"><h3>实况监测</h3><div class="product-tabs"><button class="product-tab active" data-product="radar">天气雷达</button><button class="product-tab" data-product="cloud">模式云场</button></div></section>
       <section class="product-group"><h3>高空形势</h3><div class="product-tabs"><button class="product-tab" data-product="wind850">850 hPa 风场</button><button class="product-tab" data-product="tempWind850">850 hPa 温度与风</button><button class="product-tab" data-product="humidity850">850 hPa 相对湿度</button><button class="product-tab" data-product="humidity700">700 hPa 相对湿度</button><button class="product-tab" data-product="height500">500 hPa 高度与温度场</button><button class="product-tab" data-product="mslp">海平面气压</button><button class="product-tab" data-product="h500Mslp">500 hPa + 海平面气压</button><button class="product-tab" data-product="h500T850Wind">500 hPa + 850 hPa 温风</button></div></section>
@@ -21,7 +22,7 @@
       <section class="product-group"><h3>强对流诊断</h3><div class="product-tabs"><button class="product-tab" data-product="convection">强对流诊断</button></div></section>
       <section class="product-group"><h3>模式探空</h3><div class="product-tabs"><button class="product-tab" data-product="sounding">模式探空图</button></div></section>
       <section class="product-group"><h3>动力诊断</h3><div class="product-tabs"><button class="dynamic-tab" data-dynamic="omega700">700 hPa 垂直速度</button><button class="dynamic-tab" data-dynamic="omega500">500 hPa 垂直速度</button><button class="dynamic-tab" data-dynamic="vorticity850">850 hPa 涡度</button><button class="dynamic-tab" data-dynamic="divergence200">200 hPa 散度</button></div></section>
-      <section class="product-group"><h3>水汽与剖面</h3><div class="product-tabs"><button class="moisture-tab" data-moisture="moistureFlux850">850 hPa 水汽通量</button><button class="moisture-tab" data-moisture="moistureFluxDivergence850">850 hPa 水汽通量散度</button><button class="moisture-tab" data-moisture="verticalSection">垂直剖面</button></div></section>
+      <section class="product-group"><h3>水汽与剖面</h3><div class="product-tabs"><button class="moisture-tab" data-moisture="moistureFlux850">850 hPa 水汽通量</button><button class="moisture-tab" data-moisture="moistureFluxDivergence850">850 hPa 水汽通量散度</button><button class="moisture-tab" data-moisture="verticalSection">垂直剖面</button><button class="moisture-tab" data-moisture="consultationComposite">综合会商</button></div></section>
       <section class="product-group"><h3>台风专题</h3><div class="product-tabs"><button class="dynamic-tab" data-dynamic="typhoon">台风专题</button></div></section>
     </nav>
     <section class="control-panel">
