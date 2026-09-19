@@ -32,7 +32,7 @@ async function until(predicate){
   assert.ok(predicate(),'the UI did not settle as expected');
 }
 
-async function harness(fetchImpl,{ordinaryName='moistureFlux850'}={}){
+async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeApp=false}={}){
   const classes=()=>{
     const values=new Set();
     return {add:value=>values.add(value),remove:value=>values.delete(value),
@@ -40,10 +40,12 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850'}={}){
   };
   const node=()=>({classList:classes(),textContent:'',innerHTML:'',value:'0',
     style:{},selectedOptions:[{textContent:'CMA GRAPES'}],handlers:{},
+    append(){},
     addEventListener(name,handler){this.handlers[name]=handler}});
   const consultation={...node(),dataset:{moisture:'consultationComposite'}};
   const ordinary={...node(),dataset:{moisture:ordinaryName}};
-  const product=node();
+  const product={...node(),dataset:{product:'radar'}};
+  if(includeNativeApp)product.classList.add('active');
   const elements=new Map();
   const get=id=>{if(!elements.has(id))elements.set(id,node());return elements.get(id)};
   get('modelSelect').value='cma';
@@ -51,10 +53,15 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850'}={}){
   globalThis.document={
     getElementById:get,
     querySelectorAll:selector=>selector==='.moisture-tab'?[consultation,ordinary]:
+      selector==='.product-tab'?[product]:
       selector==='.product-tab,.dynamic-tab'?[product]:
       selector==='.product-tab,.dynamic-tab,.moisture-tab'?[product,consultation,ordinary]:[],
     querySelector:selector=>selector==='.moisture-tab.active'?
-      [consultation,ordinary].find(button=>button.classList.contains('active'))||null:null,
+      [consultation,ordinary].find(button=>button.classList.contains('active'))||null:
+      selector==='.product-tab.active'?
+        (product.classList.contains('active')?product:null):
+      selector==='.moisture-tab.active,.dynamic-tab.active'?
+        [consultation,ordinary].find(button=>button.classList.contains('active'))||null:null,
     createElement:()=>({width:0,height:0,toDataURL:()=>'',
       getContext:()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),
         putImageData(){}})})
@@ -64,13 +71,14 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850'}={}){
     added.push(this);if(parent?.children)parent.children.push(this);return this;
   }});
   globalThis.L={
-    map:()=>({setView(){return this},removeLayer(item){removed.push(item)},invalidateSize(){}}),
+    map:()=>({setView(){return this},on(){return this},removeLayer(item){removed.push(item)},invalidateSize(){}}),
     tileLayer:()=>layer('tile'),imageOverlay:()=>layer('raster'),
     layerGroup:()=>layer('group'),marker:()=>layer('marker'),
     polyline:()=>layer('contour'),divIcon:()=>({})
   };
   const requests=[];
   globalThis.fetch=url=>{requests.push(new URL(url));return fetchImpl(url)};
+  if(includeNativeApp)await import(`../web/app.js?ui-${++nextImport}`);
   await import(`../web/moisture.mjs?ui-${++nextImport}`);
   return {consultation,ordinary,product,get,added,removed,requests,
     badge:get('statusBadge'),notes:get('productNotes')};
@@ -92,6 +100,35 @@ test('the visible consultation entry requests one coherent model and renders all
   assert.equal(ui.added.filter(item=>item.kind==='group').length,2);
   assert.ok(ui.added.some(item=>item.kind==='contour'));
   assert.ok(ui.added.some(item=>item.kind==='marker'));
+});
+
+test('native weather loading cannot rewrite an active consultation',async()=>{
+  let resolveRadar;
+  const ui=await harness(url=>new URL(url).host==='api.rainviewer.com'?
+    new Promise(resolve=>{resolveRadar=resolve}):Promise.resolve(response()),
+    {includeNativeApp:true});
+  assert.equal(ui.requests.length,1);
+  ui.consultation.handlers.click();
+  await until(()=>ui.badge.textContent==='数据已更新');
+  ui.get('modelSelect').value='gfs';
+  ui.get('modelSelect').onchange();
+  ui.get('modelSelect').handlers.change();
+  await until(()=>ui.badge.textContent==='数据已更新');
+  assert.equal(ui.requests.length,3,'only the active consultation should request the new model');
+  ui.get('forecastHour').value='3';
+  ui.get('forecastHour').onchange();
+  ui.get('forecastHour').handlers.change();
+  await until(()=>/03:00/.test(ui.get('validTime').textContent));
+  assert.equal(ui.requests.length,4,'only the active consultation should request the new hour');
+  const notes=ui.notes.textContent,validTime=ui.get('validTime').textContent;
+  assert.equal(ui.get('productTitle').textContent,'综合会商');
+  resolveRadar({ok:true,json:async()=>({host:'https://tilecache.rainviewer.com',
+    radar:{past:[{time:1726700000,path:'/v2/radar/test'}]}})});
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(ui.get('productTitle').textContent,'综合会商');
+  assert.equal(ui.get('validTime').textContent,validTime);
+  assert.equal(ui.notes.textContent,notes);
+  assert.equal(ui.badge.textContent,'数据已更新');
 });
 
 test('a partly missing grid displays its shortage ratio without a grade',async()=>{
