@@ -55,6 +55,8 @@ async function harness(fetchImpl,{ordinaryName='moistureFlux850',includeNativeAp
   const get=id=>{if(!elements.has(id))elements.set(id,node());return elements.get(id)};
   get('modelSelect').value='cma';
   get('forecastHour').value='0';
+  get('modelControl').classList.add('hidden');
+  get('forecastControl').classList.add('hidden');
   globalThis.document={
     getElementById:get,
     querySelectorAll:selector=>selector==='.moisture-tab'?[consultation,ordinary]:
@@ -103,6 +105,8 @@ test('the visible consultation entry requests one coherent model and renders all
   assert.equal(ui.requests[0].searchParams.get('forecast_hours'),'73');
   assert.equal(ui.requests[0].searchParams.get('latitude').split(',').length,99);
   assert.equal(ui.get('sourceText').textContent,'Open-Meteo pressure levels → derived');
+  assert.equal(ui.get('modelControl').classList.contains('hidden'),false);
+  assert.equal(ui.get('forecastControl').classList.contains('hidden'),false);
   assert.match(ui.get('validTime').textContent,/2026-09-19.*2026-09-20/);
   assert.match(ui.notes.textContent,/24 小时.*降水/);
   assert.match(ui.notes.textContent,/关注等级：重点关注/);

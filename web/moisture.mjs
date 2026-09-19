@@ -28,7 +28,7 @@ function clearMoistureOverlays(){
 }
 function draw(m,min,max,pal){ensureMap();clearMoistureOverlays();const c=document.createElement('canvas'),w=520,h=340;c.width=w;c.height=h;const x=c.getContext('2d'),img=x.createImageData(w,h);for(let py=0;py<h;py++){const gy=(1-py/(h-1))*(m.length-1),r=Math.min(m.length-2,Math.floor(gy)),ty=gy-r;for(let px=0;px<w;px++){const gx=px/(w-1)*(m[0].length-1),cc=Math.min(m[0].length-2,Math.floor(gx)),tx=gx-cc,val=bilinear(m[r][cc],m[r][cc+1],m[r+1][cc],m[r+1][cc+1],tx,ty),q=color(val,min,max,pal),k=(py*w+px)*4;img.data[k]=q[0];img.data[k+1]=q[1];img.data[k+2]=q[2];img.data[k+3]=q[3]}}x.putImageData(img,0,0);mlayer=L.imageOverlay(c.toDataURL(),[[LATS[0],LONS[0]],[LATS.at(-1),LONS.at(-1)]],{opacity:.74}).addTo(mmap);setTimeout(()=>mmap.invalidateSize(),0)}
 function setLegend(background,left,right){const bar=$('legendBar'),labels=$('legendLabels');if(bar){bar.className='legend-bar';bar.style.background=background}if(labels)labels.innerHTML=`<span>${left}</span><span>${right}</span>`}
-function activate(title,note){active=title;$('map').classList.add('hidden');$('dynamicsMap')?.classList.add('hidden');$('soundingChart').classList.add('hidden');$('soundingMetrics').classList.add('hidden');$('sectionChart').classList.add('hidden');$('moistureMap').classList.remove('hidden');$('sectionControl').classList.add('hidden');$('productTitle').textContent=title;$('productDescription').textContent=note;$('sourceText').textContent='Open-Meteo pressure levels → derived';$('modelText').textContent=$('modelSelect').selectedOptions[0]?.textContent||'模式';$('productNotes').innerHTML=`<p>${note}</p>`}
+function activate(title,note){active=title;$('modelControl').classList.remove('hidden');$('forecastControl').classList.remove('hidden');$('map').classList.add('hidden');$('dynamicsMap')?.classList.add('hidden');$('soundingChart').classList.add('hidden');$('soundingMetrics').classList.add('hidden');$('sectionChart').classList.add('hidden');$('moistureMap').classList.remove('hidden');$('sectionControl').classList.add('hidden');$('productTitle').textContent=title;$('productDescription').textContent=note;$('sourceText').textContent='Open-Meteo pressure levels → derived';$('modelText').textContent=$('modelSelect').selectedOptions[0]?.textContent||'模式';$('productNotes').innerHTML=`<p>${note}</p>`}
 export async function moistureFlux850({isCurrent=()=>true}={}){
   activate('850 hPa 水汽通量','由模式 850 hPa 温度、相对湿度、风速/风向推导比湿与水平水汽通量；属于 derived 诊断量。');
   setLegend('linear-gradient(90deg,#112f5c,#1e78aa,#38b6ad,#8bcf78,#e7dc58,#df7b45,#b53e50)','弱','强');
@@ -73,6 +73,8 @@ export async function verticalSection({isCurrent=()=>true}={}){
   $('soundingMetrics').classList.add('hidden');
   $('sectionChart').classList.remove('hidden');
   $('sectionControl').classList.remove('hidden');
+  $('modelControl').classList.remove('hidden');
+  $('forecastControl').classList.remove('hidden');
   setLegend('linear-gradient(90deg,#440154,#31688e,#35b779,#fde725)','低 RH','高 RH');
   $('productTitle').textContent='垂直剖面';
   $('productDescription').textContent='沿两点连线采样的模式温湿与可用垂直速度剖面';
