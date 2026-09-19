@@ -29,6 +29,8 @@ jobs:
         run: npm test
       - name: Check JavaScript module syntax
         run: find web -maxdepth 1 -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+      - name: Install Chinese font for screenshots
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends fonts-noto-cjk
       - name: Open consultation in Chrome
         timeout-minutes: 4
         run: node scripts/browser-smoke-v1.6.mjs

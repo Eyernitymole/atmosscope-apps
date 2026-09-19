@@ -55,15 +55,19 @@ async function liveProvider(){
   const fields=['geopotential_height_500hPa','temperature_850hPa',
     'relative_humidity_850hPa','wind_speed_850hPa',
     'wind_direction_850hPa','precipitation'];
-  const query=new URLSearchParams({latitude:'35',longitude:'105',hourly:fields.join(','),
+  const latitude=Array.from({length:99},(_,i)=>15+5*Math.floor(i/11)).join(',');
+  const longitude=Array.from({length:99},(_,i)=>75+6*(i%11)).join(',');
+  const query=new URLSearchParams({latitude,longitude,hourly:fields.join(','),
     forecast_hours:'24',timezone:'GMT',wind_speed_unit:'ms'});
   try{
     const response=await fetch(`https://api.open-meteo.com/v1/cma?${query}`,
       {signal:AbortSignal.timeout(15000)});
     const data=await response.json();
-    return {httpStatus:response.status,reason:data.reason??null,
+    const points=Array.isArray(data)?data:[data];
+    return {httpStatus:response.status,reason:data.reason??null,pointCount:points.length,
       fields:Object.fromEntries(fields.map(name=>[name,
-        Array.isArray(data.hourly?.[name])?data.hourly[name].length:null]))};
+        points.every(point=>Array.isArray(point.hourly?.[name]))?
+          Math.min(...points.map(point=>point.hourly[name].length)):null]))};
   }catch(error){return {unavailable:String(error.message??error)}}
 }
 
@@ -89,6 +93,14 @@ try{
   session=created.sessionId;
   const route=`/session/${session}`;
   const evaluate=script=>command('POST',route+'/execute/sync',{script,args:[]});
+  const capture=async filename=>{
+    const height=await evaluate(`return Math.max(document.body.scrollHeight,
+      document.documentElement.scrollHeight)`);
+    const screenshot=await command('POST',route+'/goog/cdp/execute',
+      {cmd:'Page.captureScreenshot',params:{format:'png',captureBeyondViewport:true,
+        clip:{x:0,y:0,width:1440,height,scale:1}}});
+    await writeFile(path.join(output,filename),Buffer.from(screenshot.data,'base64'));
+  };
   const click=async selector=>{
     const element=await command('POST',route+'/element',
       {using:'css selector',value:selector});
@@ -121,8 +133,7 @@ try{
   assert.ok(first.contours>0&&first.vectors>0,
     `Missing contour or moisture vectors: ${JSON.stringify(first)}`);
   assert.match(first.notes,/关注等级：重点关注/);
-  await writeFile(path.join(output,'consultation-complete.png'),
-    Buffer.from(await command('GET',route+'/screenshot'),'base64'));
+  await capture('consultation-complete.png');
   await evaluate(`const model=document.querySelector('#modelSelect');model.value='gfs';
     model.dispatchEvent(new Event('change',{bubbles:true}));
     const hour=document.querySelector('#forecastHour');hour.value='3';
@@ -137,8 +148,7 @@ try{
     const state=await view();return state.notes?.includes('缺测 1/99')?state:null;
   },'partial coverage');
   assert.doesNotMatch(partial.notes,/关注等级：/);
-  await writeFile(path.join(output,'consultation-partial.png'),
-    Buffer.from(await command('GET',route+'/screenshot'),'base64'));
+  await capture('consultation-partial.png');
   await evaluate(`window.__atmoMode='missing'`);
   await click('button[data-moisture="consultationComposite"]');
   const missing=await waitFor(async()=>{
