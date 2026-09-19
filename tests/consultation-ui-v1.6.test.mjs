@@ -107,7 +107,8 @@ test('the visible consultation entry requests one coherent model and renders all
   assert.equal(ui.get('sourceText').textContent,'Open-Meteo pressure levels → derived');
   assert.equal(ui.get('modelControl').classList.contains('hidden'),false);
   assert.equal(ui.get('forecastControl').classList.contains('hidden'),false);
-  assert.match(ui.get('validTime').textContent,/2026-09-19.*2026-09-20/);
+  assert.equal(ui.get('validTime').textContent,
+    '2026-09-19 00:00 UTC → 2026-09-20 00:00 UTC');
   assert.match(ui.notes.textContent,/24 小时.*降水/);
   assert.match(ui.notes.textContent,/关注等级：重点关注/);
   assert.match(ui.notes.textContent,/derived/);

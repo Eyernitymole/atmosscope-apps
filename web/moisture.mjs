@@ -158,7 +158,8 @@ async function loadConsultationComposite({isCurrent=()=>true}={}){
     addMoistureVectors(composite.moisture.qu,composite.moisture.qv),L).addTo(mmap);
   setLegend('linear-gradient(90deg,#183a63,#64b8c4,#e5d05b,#d67143)',
     '0 mm','24 h 较多');
-  $('validTime').textContent=`${time.start} → ${time.end}`;
+  const utc=iso=>`${iso.slice(0,10)} ${iso.slice(11,16)} UTC`;
+  $('validTime').textContent=`${utc(time.start)} → ${utc(time.end)}`;
   const coverageNote=coverage.valid===coverage.total
     ?`App 内部关注等级：${panel.risk}；有效点 ${coverage.valid}/${coverage.total}`
     :`缺测 ${coverage.total-coverage.valid}/${coverage.total}`;

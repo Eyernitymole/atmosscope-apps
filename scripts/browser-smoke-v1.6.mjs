@@ -58,7 +58,7 @@ async function liveProvider(){
   const latitude=Array.from({length:99},(_,i)=>15+5*Math.floor(i/11)).join(',');
   const longitude=Array.from({length:99},(_,i)=>75+6*(i%11)).join(',');
   const query=new URLSearchParams({latitude,longitude,hourly:fields.join(','),
-    forecast_hours:'24',timezone:'GMT',wind_speed_unit:'ms'});
+    forecast_hours:'73',timezone:'GMT',wind_speed_unit:'ms'});
   try{
     const response=await fetch(`https://api.open-meteo.com/v1/cma?${query}`,
       {signal:AbortSignal.timeout(15000)});
