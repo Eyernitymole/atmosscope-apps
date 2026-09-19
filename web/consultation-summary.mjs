@@ -1,28 +1,17 @@
-function level(value, thresholds){
-  const n=Number(value)||0;
-  return n>=thresholds.high?'strong':n>=thresholds.medium?'moderate':'weak';
-}
+// This rule is a sampled-grid screening aid, not an official weather warning.
+export function summarizeConsultation({rain24,moistureMagnitude,coverage}){
+  const values=rain24.flat().filter(Number.isFinite);
+  if(!values.length||!moistureMagnitude.flat().some(Number.isFinite))
+    return {risk:'未判定',factors:[],text:'数据不足',method:'采样网格 derived 诊断'};
 
-export function diagnoseConsultation(input={}){
-  const height=input.height500||{};
-  const moisture=input.moisture850||{};
-  const rain=input.precipitation24||0;
+  const maximum=Math.max(...values);
+  if(coverage.valid!==coverage.total)
+    return {risk:'未判定',factors:[],
+      text:`有效采样点 ${coverage.valid}/${coverage.total}；有效点最大值 ${maximum} mm。`,
+      method:'采样网格 derived 诊断；缺测时不分级'};
 
-  const moistureState=level(moisture.magnitude,{medium:0,high:moisture.threshold??1});
-  const rainState=level(rain,{medium:input.rainMedium??10,high:input.rainHigh??30});
-
-  const factors=[];
-  if(height.trough) factors.push('500 hPa低槽影响');
-  if(moistureState!=='weak') factors.push('低层水汽输送增强');
-  if(rainState!=='weak') factors.push('未来降水响应明显');
-
-  let text='当前天气形势以常规模式场诊断为基础。';
-  if(factors.length) text=`${factors.join('，')}，需关注相关天气影响。`;
-
-  return {
-    risk:rainState==='strong'&&moistureState!=='weak'?'较高':'一般',
-    factors,
-    text,
-    method:'规则诊断 derived from model fields'
-  };
+  const risk=maximum>=30?'重点关注':maximum>=10?'关注':'一般';
+  return {risk,factors:['500 hPa高度场可用','850 hPa水汽输送图层可用'],
+    text:`采样网格区域最大 24 小时降水 ${maximum} mm；10/30 mm 为 App 内部关注筛查线，不是官方预警。`,
+    method:'真实模式字段 + 采样网格派生诊断'};
 }

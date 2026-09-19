@@ -1,3 +1,17 @@
+import { contourSegments } from './meteo.mjs';
+
+export function renderHeightContourLayer(map,field,lats,lons,L){
+  const layer=L.layerGroup();
+  const values=field.flat().filter(Number.isFinite);
+  if(!values.length) return layer;
+  for(let level=Math.ceil(Math.min(...values)/60)*60;
+      level<=Math.floor(Math.max(...values)/60)*60;level+=60){
+    for(const points of contourSegments(field,lats,lons,level))
+      L.polyline(points,{className:'height-contour-line'}).addTo(layer);
+  }
+  return layer;
+}
+
 export function renderMoistureVectorLayer(map, vectors, L){
   const layer=L.layerGroup();
   for(const p of vectors){

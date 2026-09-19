@@ -19,8 +19,14 @@ test('samples finite 850 hPa moisture flux components every two grid cells', () 
     [0, 0, 5], [0, 2, 2], [2, 2, 13]
   ]);
   assert.deepEqual([vectors[0].lat, vectors[0].lon, vectors[0].mag], [15, 75, 5]);
-  assert.equal(vectors[0].angle, Math.atan2(4, 3) * 180 / Math.PI);
+  assert.equal(vectors[0].angle, -Math.atan2(4, 3) * 180 / Math.PI);
   assert.ok(vectors.every(({ className }) => className === 'moisture-vector-arrow'));
+});
+
+test('northward moisture arrows point up while eastward arrows point right',()=>{
+  const vectors=addMoistureVectors([[0,0,1]],[[1,0,0]]);
+  assert.equal(vectors[0].angle,-90);
+  assert.equal(vectors[1].angle,0);
 });
 
 test('sums exactly the selected 24-hour precipitation window', () => {
