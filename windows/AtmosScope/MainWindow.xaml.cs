@@ -7,7 +7,7 @@ namespace AtmosScope;
 
 public partial class MainWindow : Window
 {
-    private static readonly Uri OrdinaryHome = new("https://atmosscope-weather.phillipchan520.chatgpt.site/");
+    private static readonly Uri OrdinaryHome = new("https://app.atmosscope.local/ordinary.html");
     private static readonly Uri ProfessionalHome = new("https://app.atmosscope.local/index.html");
     private const string LocalHost = "app.atmosscope.local";
     private const string RuntimeDownload = "https://developer.microsoft.com/microsoft-edge/webview2/";
@@ -52,8 +52,13 @@ public partial class MainWindow : Window
 
     private static bool IsTrusted(string uri) => Uri.TryCreate(uri, UriKind.Absolute, out var target)
         && target.Scheme == Uri.UriSchemeHttps
-        && (target.Host.Equals(LocalHost, StringComparison.OrdinalIgnoreCase) || target.Host.Equals(OrdinaryHome.Host, StringComparison.OrdinalIgnoreCase));
+        && target.Host.Equals(LocalHost, StringComparison.OrdinalIgnoreCase);
 
-    private static void OpenExternal(string uri) => Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
+    private static void OpenExternal(string uri)
+    {
+        if (!Uri.TryCreate(uri, UriKind.Absolute, out var target)) return;
+        if (target.Scheme is not (Uri.UriSchemeHttp or Uri.UriSchemeHttps)) return;
+        Process.Start(new ProcessStartInfo(target.AbsoluteUri) { UseShellExecute = true });
+    }
     private void InstallRuntime_Click(object sender, RoutedEventArgs e) => OpenExternal(RuntimeDownload);
 }

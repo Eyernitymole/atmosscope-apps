@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#071a2c" />
+  <title>天衡气象 · 普通天气</title>
+  <link rel="stylesheet" href="ordinary.css" />
+</head>
+<body>
+  <div class="weather-shell">
+    <header class="weather-header">
+      <div><p class="eyebrow">ATMOSSCOPE / WEATHER</p><h1>天衡气象 · 普通天气</h1>
+        <p class="subtitle">选择城市，查看模式当前场和未来天气趋势。</p></div>
+      <a class="atlas-link" href="index.html">专业图集 <span aria-hidden="true">↗</span></a>
+    </header>
+    <main>
+      <section class="search-card" aria-label="城市搜索">
+        <form id="cityForm" autocomplete="off">
+          <label for="cityQuery">搜索城市</label>
+          <div class="search-row"><input id="cityQuery" type="search" placeholder="输入城市或地区名称" required />
+            <button type="submit">搜索</button></div>
+        </form>
+        <div id="cityResults" class="city-results" aria-label="候选城市"></div>
+      </section>
+      <p id="statusText" class="status" role="status" aria-live="polite">正在准备天气数据…</p>
+      <section class="location-block" aria-label="所选城市">
+        <div><p class="eyebrow">当前城市 / LOCATION</p><h2 id="cityName">广州 · 广东</h2></div>
+        <button id="refreshBtn" type="button" class="refresh-btn">重试或刷新</button>
+      </section>
+      <div class="meta"><span id="cityTimeZone">城市时区：—</span><span id="updatedAt">数据时间：暂无数据</span></div>
+      <section id="currentPanel" class="current-card" aria-label="模式当前场"></section>
+      <section class="forecast-card" aria-label="未来24小时"><div class="section-heading"><div><p class="eyebrow">HOURLY FORECAST</p><h2>未来 24 小时</h2></div><span>逐小时模式预报</span></div><ol id="hourlyList" class="hourly-list"></ol></section>
+      <section class="forecast-card" aria-label="未来7天"><div class="section-heading"><div><p class="eyebrow">DAILY OUTLOOK</p><h2>未来 7 天</h2></div><span>趋势仅供参考</span></div><ol id="dailyList" class="daily-list"></ol></section>
+    </main>
+    <footer id="sourceText">数据：Open-Meteo 最佳匹配模式 · 模式当前场与预报，并非站点实况或官方预警。预报需要联网。</footer>
+  </div>
+  <script type="module" src="ordinary.mjs"></script>
+</body>
+</html>

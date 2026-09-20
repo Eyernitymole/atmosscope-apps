@@ -1,0 +1,55 @@
+:root {color-scheme:dark;font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#071521;color:#e5f2f7}
+* {box-sizing:border-box}
+body {margin:0;min-width:300px;background:radial-gradient(circle at 80% -15%,#174665 0,transparent 38%),linear-gradient(160deg,#071521,#0b2231 68%,#0a1a28);min-height:100vh}
+button,input {font:inherit}
+button {cursor:pointer}
+a {color:inherit}
+:focus-visible {outline:3px solid #7bd6ed;outline-offset:3px}
+.weather-shell {max-width:1160px;margin:0 auto;padding:clamp(20px,4vw,50px)}
+.weather-header {display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:36px}
+.weather-header h1 {margin:9px 0 10px;font-size:clamp(27px,3.5vw,42px);letter-spacing:.025em}
+.eyebrow {color:#73bad3;font-weight:700;letter-spacing:.15em;font-size:11px;text-transform:uppercase;margin:0}
+.subtitle,.meta,footer {color:#aac6d1}
+.subtitle {margin:0;font-size:15px}
+.atlas-link {display:inline-flex;gap:10px;align-items:center;white-space:nowrap;text-decoration:none;background:#123348;border:1px solid #29627c;padding:12px 17px;border-radius:14px;font-weight:650}
+.atlas-link:hover,.refresh-btn:hover {background:#1e5067}
+.search-card,.forecast-card,.current-card {background:rgba(15,39,55,.86);border:1px solid #265067;box-shadow:0 16px 42px rgba(0,0,0,.12);border-radius:22px}
+.search-card {padding:20px 24px}
+label {display:block;margin-bottom:10px;font-weight:650}
+.search-row {display:flex;gap:10px}
+.search-row input {width:100%;min-width:0;border:1px solid #426b7d;border-radius:12px;padding:12px 15px;background:#0b2030;color:#e5f2f7}
+.search-row input::placeholder {color:#8daeba}
+.search-row button {border:0;border-radius:12px;padding:10px 24px;background:#72cde1;color:#072533;font-weight:750}
+.city-results {display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.city-results:empty {display:none}
+.city-results button {border:1px solid #426b7d;border-radius:12px;padding:9px 13px;background:#16374c;color:#e5f2f7;text-align:left}
+.city-results button:hover {border-color:#82d3e7}
+.status {min-height:24px;margin:16px 0 30px;color:#b4dce7}
+.location-block {display:flex;justify-content:space-between;align-items:flex-end;gap:14px}
+.location-block h2 {margin:8px 0 0;font-size:clamp(27px,3vw,38px)}
+.refresh-btn {border:1px solid #426b7d;border-radius:12px;padding:10px 15px;background:#15374c;color:#e5f2f7;white-space:nowrap}
+.meta {display:flex;flex-wrap:wrap;gap:10px 22px;margin:15px 0 20px;font-size:13px}
+.current-card {padding:25px 28px;min-height:182px;margin-bottom:20px;background:linear-gradient(120deg,rgba(24,87,111,.85),rgba(12,43,64,.92))}
+.current-card h2 {margin:0 0 12px;color:#a5d7e7;font-size:16px}
+.current-main {display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
+.current-main strong {font-size:clamp(38px,6vw,70px);font-weight:600;line-height:1.1}
+.current-detail {display:flex;flex-wrap:wrap;gap:12px 30px;margin:20px 0 0;padding:0;list-style:none;color:#d2e8ee}
+.forecast-card {padding:24px 27px;margin-bottom:20px}
+.section-heading {display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:23px}
+.section-heading h2 {margin:6px 0 0;font-size:23px}
+.section-heading>span {color:#a7c3cf;font-size:13px}
+.hourly-list,.daily-list {list-style:none;margin:0;padding:0}
+.hourly-list {display:flex;gap:10px;overflow-x:auto;padding:1px 1px 11px;scrollbar-color:#568ca3 #15374c}
+.hourly-list li {flex:0 0 132px;border-radius:15px;background:#14384d;padding:14px 13px;min-height:146px}
+.hourly-list time,.daily-list time {display:block;color:#a9cbd7;font-size:13px}
+.hourly-list strong {display:block;font-size:23px;margin:12px 0 6px}
+.hourly-list span {display:block;color:#cae4ec;font-size:12px;line-height:1.7}
+.daily-list {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px}
+.daily-list li {border:1px solid #2b5970;background:#123448;border-radius:15px;padding:15px 12px;min-width:0}
+.daily-list strong {display:block;margin:9px 0;font-size:17px}
+.daily-list span {display:block;color:#c7e0e8;font-size:12px;line-height:1.7}
+.empty {color:#a5c4ce}
+footer {font-size:12px;line-height:1.6;padding:14px 0 8px}
+@media(max-width:900px) {.daily-list {grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:720px) {.weather-header {flex-direction:column;margin-bottom:25px}.weather-shell {padding:18px}.atlas-link {padding:10px 14px}.search-card,.forecast-card,.current-card {border-radius:17px}.search-card,.forecast-card {padding:18px}.daily-list {grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading {align-items:start;flex-direction:column;gap:5px}}
+@media(max-width:420px) {.search-row button {padding:10px 16px}.location-block {align-items:start;flex-direction:column}.current-card {padding:21px}.hourly-list li {flex-basis:120px}}

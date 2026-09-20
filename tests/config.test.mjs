@@ -21,13 +21,17 @@ test("Android exposes ordinary weather and bundled professional atlas", () => {
   const gradle = read("android/app/build.gradle.kts");
   const manifest = read("android/app/src/main/AndroidManifest.xml");
   const activity = read("android/app/src/main/java/com/atmosscope/weather/MainActivity.java");
+  const strings = read("android/app/src/main/res/values/strings.xml");
   assert.match(gradle, /applicationId = "com\.atmosscope\.weather"/);
   assert.match(gradle, /assets\.srcDir\(rootProject\.file\("\.\.\/web"\)\)/);
   assert.doesNotMatch(gradle, /androidbrowserhelper/);
   assert.match(manifest, /android:name="\.MainActivity"/);
   assert.match(activity, /普通天气/);
   assert.match(activity, /专业图集/);
-  assert.match(activity, /file:\/\/\/android_asset\/index\.html/);
+  assert.match(activity, /https:\/\/appassets\.androidplatform\.net\/assets\/ordinary\.html/);
+  assert.match(activity, /https:\/\/appassets\.androidplatform\.net\/assets\/index\.html/);
+  assert.doesNotMatch(activity, /chatgpt\.site|file:\/\/\/android_asset|setAllowUniversalAccessFromFileURLs\(true\)/);
+  assert.doesNotMatch(strings, /launch_url|asset_statements|chatgpt\.site/);
 });
 
 test("Windows exposes ordinary weather and bundled professional atlas", () => {
@@ -38,6 +42,9 @@ test("Windows exposes ordinary weather and bundled professional atlas", () => {
   assert.match(xaml, /普通天气/);
   assert.match(xaml, /专业图集/);
   assert.match(window, /app\.atmosscope\.local/);
+  assert.match(window, /app\.atmosscope\.local\/ordinary\.html/);
+  assert.match(window, /app\.atmosscope\.local\/index\.html/);
+  assert.doesNotMatch(window, /chatgpt\.site|OrdinaryHome\.Host/);
   assert.match(window, /SetVirtualHostNameToFolderMapping/);
 });
 
