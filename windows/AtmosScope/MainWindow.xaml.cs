@@ -23,7 +23,10 @@ public partial class MainWindow : Window
         try
         {
             _ = CoreWebView2Environment.GetAvailableBrowserVersionString();
-            await WeatherView.EnsureCoreWebView2Async();
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AtmosScope");
+            Directory.CreateDirectory(appData);
+            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: Path.Combine(appData, "WebView2"));
+            await WeatherView.EnsureCoreWebView2Async(environment);
             var webRoot = Path.Combine(AppContext.BaseDirectory, "Web");
             WeatherView.CoreWebView2.SetVirtualHostNameToFolderMapping(LocalHost, webRoot, CoreWebView2HostResourceAccessKind.Allow);
             WeatherView.CoreWebView2.NewWindowRequested += NewWindowRequested;
@@ -32,6 +35,12 @@ public partial class MainWindow : Window
         }
         catch (WebView2RuntimeNotFoundException)
         {
+            RuntimeError.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            RuntimeErrorTitle.Text = "无法启动气象页面";
+            RuntimeErrorDescription.Text = $"请重启应用；如果仍无法打开，请提供此错误信息：{ex.Message}";
             RuntimeError.Visibility = Visibility.Visible;
         }
     }
