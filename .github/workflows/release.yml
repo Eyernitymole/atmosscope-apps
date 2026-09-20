@@ -112,6 +112,10 @@ jobs:
         env:
           APP_VERSION: ${{ needs.version.outputs.value }}
         run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
+      - name: Launch from protected install directory
+        shell: pwsh
+        timeout-minutes: 3
+        run: ./scripts/windows-startup-smoke.ps1 -PublishDir windows/publish
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --no-progress -y

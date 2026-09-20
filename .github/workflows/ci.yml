@@ -67,9 +67,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: {dotnet-version: '8.0.x'}
-      - run: dotnet build windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64
+      - run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish
       - name: Verify bundled pages in output
         shell: pwsh
         run: |
-          if (-not (Get-ChildItem windows/AtmosScope/bin/Release -Recurse -Filter ordinary.html)) { throw 'Bundled ordinary page missing' }
-          if (-not (Get-ChildItem windows/AtmosScope/bin/Release -Recurse -Filter index.html)) { throw 'Bundled professional page missing' }
+          if (-not (Test-Path windows/publish/Web/ordinary.html)) { throw 'Bundled ordinary page missing' }
+          if (-not (Test-Path windows/publish/Web/index.html)) { throw 'Bundled professional page missing' }
+      - name: Launch from protected install directory
+        shell: pwsh
+        timeout-minutes: 3
+        run: ./scripts/windows-startup-smoke.ps1 -PublishDir windows/publish
