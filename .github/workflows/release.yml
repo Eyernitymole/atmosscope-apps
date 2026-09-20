@@ -157,4 +157,4 @@ jobs:
             release-assets/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
-            --notes "专业图集 v1.6：新增综合会商，以所选模式的 500 hPa 位势高度、850 hPa 温湿风场和逐小时降水生成采样网格组合图与未来 24 小时降水累计。显示派生高度等值线、水汽矢量、降水底色、有效采样点及 App 内部筛查规则；缺测时不判定关注等级，这不是官方预警。保留 V5 水汽通量、水汽通量散度、两点垂直剖面及原有雷达、模式场、探空、动力诊断和 JMA 台风专题。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
+            --notes "AtmosScope v1.7：普通天气在应用内加载，支持城市搜索、模式当前场、未来 24 小时和 7 天预报；专业图集保留 v1.6 的综合会商与原有产品。预报需要联网，尚未部署独立公开网址。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"

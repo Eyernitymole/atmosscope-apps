@@ -2,18 +2,24 @@ package com.atmosscope.weather;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import androidx.webkit.WebViewAssetLoader;
 
 public final class MainActivity extends Activity {
-    private static final String ORDINARY_HOME = "https://atmosscope-weather.phillipchan520.chatgpt.site/";
-    private static final String PROFESSIONAL_HOME = "file:///android_asset/index.html";
+    private static final String ORDINARY_HOME = "https://appassets.androidplatform.net/assets/ordinary.html";
+    private static final String PROFESSIONAL_HOME = "https://appassets.androidplatform.net/assets/index.html";
     private WebView weatherView;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -32,8 +38,28 @@ public final class MainActivity extends Activity {
         nav.addView(professional,new LinearLayout.LayoutParams(0,ViewGroup.LayoutParams.WRAP_CONTENT,1f));
         weatherView = new WebView(this);
         WebSettings s = weatherView.getSettings();
-        s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setAllowFileAccess(true); s.setAllowContentAccess(true); s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        weatherView.setWebViewClient(new WebViewClient());
+        s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setAllowFileAccess(false); s.setAllowContentAccess(false); s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        s.setAllowFileAccessFromFileURLs(false);
+        s.setAllowUniversalAccessFromFileURLs(false);
+        WebViewAssetLoader assets = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+        weatherView.setWebViewClient(new WebViewClient() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assets.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri url = request.getUrl();
+                if ("https".equals(url.getScheme()) && "appassets.androidplatform.net".equals(url.getHost())
+                        && url.getPath() != null && url.getPath().startsWith("/assets/")) return false;
+                if (request.isForMainFrame() && ("https".equals(url.getScheme()) || "http".equals(url.getScheme()))) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, url)); }
+                    catch (ActivityNotFoundException ignored) { }
+                }
+                return true;
+            }
+        });
         root.addView(nav,new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
         root.addView(weatherView,new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,1f));
         setContentView(root);
@@ -43,15 +69,10 @@ public final class MainActivity extends Activity {
     }
 
     private void loadOrdinary() {
-        weatherView.getSettings().setAllowFileAccessFromFileURLs(false);
-        weatherView.getSettings().setAllowUniversalAccessFromFileURLs(false);
         weatherView.loadUrl(ORDINARY_HOME);
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     private void loadProfessional() {
-        weatherView.getSettings().setAllowFileAccessFromFileURLs(true);
-        weatherView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         weatherView.loadUrl(PROFESSIONAL_HOME);
     }
 

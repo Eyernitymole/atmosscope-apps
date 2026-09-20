@@ -9,7 +9,7 @@
             <StackPanel Orientation="Horizontal">
                 <Button Width="120" Margin="0,0,8,0" Click="OrdinaryWeather_Click" Content="普通天气"/>
                 <Button Width="120" Click="ProfessionalAtlas_Click" Content="专业图集"/>
-                <TextBlock Margin="18,0,0,0" VerticalAlignment="Center" Foreground="#8EABB9" Text="普通天气保留现有站点 · 专业图集使用本地前端与真实数据源"/>
+                <TextBlock Margin="18,0,0,0" VerticalAlignment="Center" Foreground="#8EABB9" Text="普通天气与专业图集均为应用内页面 · 预报需要联网"/>
             </StackPanel>
         </Border>
         <wv2:WebView2 Grid.Row="1" x:Name="WeatherView"/>
