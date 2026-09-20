@@ -44,8 +44,11 @@ try {
         Start-Sleep -Milliseconds 500
     }
     if (-not (Test-Path $state)) {
+        $status = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-status.txt'
+        if (Test-Path $status) { Write-Host "Application startup phase: $(Get-Content $status -Raw)" }
         $diagnostic = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-error.txt'
         if (Test-Path $diagnostic) { Write-Host "Application startup error:`n$(Get-Content $diagnostic -Raw)" }
+        Write-Host "Window handle: $($process.MainWindowHandle); WebView2 directory exists: $(Test-Path $webViewProfile)"
         throw "WebView2 did not initialize in the writable user profile: $state"
     }
     if ($process.MainWindowHandle -eq 0) { throw 'Application did not create a window' }
