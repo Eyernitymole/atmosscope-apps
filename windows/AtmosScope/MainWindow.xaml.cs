@@ -39,6 +39,13 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            try
+            {
+                var diagnosticDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AtmosScope");
+                Directory.CreateDirectory(diagnosticDir);
+                File.WriteAllText(Path.Combine(diagnosticDir, "startup-error.txt"), ex.ToString());
+            }
+            catch (Exception) { /* Keep the error visible even when diagnostics cannot be written. */ }
             RuntimeErrorTitle.Text = "无法启动气象页面";
             RuntimeErrorDescription.Text = $"请重启应用；如果仍无法打开，请提供此错误信息：{ex.Message}";
             RuntimeError.Visibility = Visibility.Visible;

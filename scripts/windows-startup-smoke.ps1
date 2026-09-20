@@ -43,7 +43,11 @@ try {
         if ((Test-Path $state) -and $process.MainWindowHandle -ne 0) { break }
         Start-Sleep -Milliseconds 500
     }
-    if (-not (Test-Path $state)) { throw "WebView2 did not initialize in the writable user profile: $state" }
+    if (-not (Test-Path $state)) {
+        $diagnostic = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-error.txt'
+        if (Test-Path $diagnostic) { Write-Host "Application startup error:`n$(Get-Content $diagnostic -Raw)" }
+        throw "WebView2 did not initialize in the writable user profile: $state"
+    }
     if ($process.MainWindowHandle -eq 0) { throw 'Application did not create a window' }
     Write-Host 'Installed application opened its window and initialized WebView2 from a read-only directory.'
 }
