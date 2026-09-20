@@ -19,13 +19,26 @@ Copy-Item -Path $source -Destination $isolated -Recurse
 
 try {
     # Prove that this runner can start WebView2 before reproducing an unwritable install.
+    $controlStarted = Get-Date
     $controlProcess = Start-Process -FilePath (Join-Path $controlDir 'AtmosScope.exe') `
         -WorkingDirectory $controlDir -PassThru
     $controlState = Join-Path $controlDir 'AtmosScope.exe.WebView2\Local State'
     $controlDeadline = [DateTime]::UtcNow.AddSeconds(30)
     while ([DateTime]::UtcNow -lt $controlDeadline) {
         $controlProcess.Refresh()
-        if ($controlProcess.HasExited) { throw "Writable-directory control exited during startup: $($controlProcess.ExitCode)" }
+        if ($controlProcess.HasExited) {
+            Start-Sleep -Seconds 2
+            try {
+                Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $controlStarted.AddSeconds(-2) } `
+                    -ErrorAction Stop | Where-Object {
+                        $_.ProviderName -in @('.NET Runtime', 'Application Error') -and $_.Message -match 'AtmosScope'
+                    } | Select-Object -First 5 | ForEach-Object {
+                        Write-Host "Startup crash event $($_.Id) ($($_.ProviderName)):`n$($_.Message)"
+                    }
+            }
+            catch { Write-Warning "Could not read Windows crash events: $_" }
+            throw "Writable-directory control exited during startup: $($controlProcess.ExitCode)"
+        }
         if (Test-Path $controlState) { break }
         Start-Sleep -Milliseconds 500
     }
