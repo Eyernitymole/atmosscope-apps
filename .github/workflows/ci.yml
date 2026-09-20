@@ -73,6 +73,9 @@ jobs:
         run: |
           if (-not (Test-Path windows/publish/Web/ordinary.html)) { throw 'Bundled ordinary page missing' }
           if (-not (Test-Path windows/publish/Web/index.html)) { throw 'Bundled professional page missing' }
+      - name: Ensure WebView2 Runtime is available
+        shell: pwsh
+        run: ./scripts/install-webview2-runtime.ps1
       - name: Launch from protected install directory
         shell: pwsh
         timeout-minutes: 3

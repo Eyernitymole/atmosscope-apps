@@ -112,6 +112,9 @@ jobs:
         env:
           APP_VERSION: ${{ needs.version.outputs.value }}
         run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
+      - name: Ensure WebView2 Runtime is available
+        shell: pwsh
+        run: ./scripts/install-webview2-runtime.ps1
       - name: Launch from protected install directory
         shell: pwsh
         timeout-minutes: 3
