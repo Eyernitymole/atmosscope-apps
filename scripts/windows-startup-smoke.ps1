@@ -24,7 +24,7 @@ try {
     $process = Start-Process -FilePath (Join-Path $isolated 'AtmosScope.exe') `
         -WorkingDirectory $isolated -PassThru
     $deadline = [DateTime]::UtcNow.AddSeconds(30)
-    $state = Join-Path $webViewProfile 'Local State'
+    $status = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-status.txt'
     while ([DateTime]::UtcNow -lt $deadline) {
         $process.Refresh()
         if ($process.HasExited) {
@@ -40,16 +40,18 @@ try {
             catch { Write-Warning "Could not read Windows crash events: $_" }
             throw "Installed application exited during startup: $($process.ExitCode)"
         }
-        if ((Test-Path $state) -and $process.MainWindowHandle -ne 0) { break }
+        if ((Test-Path $webViewProfile) -and (Test-Path $status) -and $process.MainWindowHandle -ne 0) {
+            if ((Get-Content $status -Raw).Trim() -eq 'Navigating to ordinary weather') { break }
+        }
         Start-Sleep -Milliseconds 500
     }
-    if (-not (Test-Path $state)) {
-        $status = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-status.txt'
+    if (-not (Test-Path $webViewProfile) -or -not (Test-Path $status) -or
+        (Get-Content $status -Raw).Trim() -ne 'Navigating to ordinary weather') {
         if (Test-Path $status) { Write-Host "Application startup phase: $(Get-Content $status -Raw)" }
         $diagnostic = Join-Path $env:LOCALAPPDATA 'AtmosScope\startup-error.txt'
         if (Test-Path $diagnostic) { Write-Host "Application startup error:`n$(Get-Content $diagnostic -Raw)" }
         Write-Host "Window handle: $($process.MainWindowHandle); WebView2 directory exists: $(Test-Path $webViewProfile)"
-        throw "WebView2 did not initialize in the writable user profile: $state"
+        throw "WebView2 did not initialize in the writable user profile: $webViewProfile"
     }
     if ($process.MainWindowHandle -eq 0) { throw 'Application did not create a window' }
     Write-Host 'Installed application opened its window and initialized WebView2 from a read-only directory.'
