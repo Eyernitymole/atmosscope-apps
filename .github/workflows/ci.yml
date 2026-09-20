@@ -80,3 +80,19 @@ jobs:
         shell: pwsh
         timeout-minutes: 3
         run: ./scripts/windows-startup-smoke.ps1 -PublishDir windows/publish
+      - name: Build preview installer
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          $version = (Get-Content .release-version -Raw).Trim()
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=$version" windows/installer/AtmosScope.iss
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path artifacts/AtmosScope-Windows-Setup.exe)) { throw 'Preview installer build failed' }
+          Copy-Item artifacts/AtmosScope-Windows-Setup.exe "artifacts/AtmosScope-Windows-Setup-$version-preview.exe"
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: windows-setup-preview
+          path: artifacts/*-preview.exe
+          if-no-files-found: error
+          retention-days: 14
