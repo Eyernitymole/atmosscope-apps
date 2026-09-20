@@ -57,7 +57,7 @@ public partial class MainWindow : Window
     private static void OpenExternal(string uri)
     {
         if (!Uri.TryCreate(uri, UriKind.Absolute, out var target)) return;
-        if (target.Scheme is not (Uri.UriSchemeHttp or Uri.UriSchemeHttps)) return;
+        if (target.Scheme != Uri.UriSchemeHttp && target.Scheme != Uri.UriSchemeHttps) return;
         Process.Start(new ProcessStartInfo(target.AbsoluteUri) { UseShellExecute = true });
     }
     private void InstallRuntime_Click(object sender, RoutedEventArgs e) => OpenExternal(RuntimeDownload);
