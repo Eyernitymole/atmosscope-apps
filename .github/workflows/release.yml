@@ -112,6 +112,13 @@ jobs:
         env:
           APP_VERSION: ${{ needs.version.outputs.value }}
         run: dotnet publish windows/AtmosScope/AtmosScope.csproj -c Release -r win-x64 --self-contained true -o windows/publish /p:Version=$env:APP_VERSION
+      - name: Ensure WebView2 Runtime is available
+        shell: pwsh
+        run: ./scripts/install-webview2-runtime.ps1
+      - name: Launch from protected install directory
+        shell: pwsh
+        timeout-minutes: 3
+        run: ./scripts/windows-startup-smoke.ps1 -PublishDir windows/publish
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --no-progress -y
@@ -157,4 +164,4 @@ jobs:
             release-assets/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --title "AtmosScope v$VERSION" \
-            --notes "AtmosScope v1.7：普通天气在应用内加载，支持城市搜索、模式当前场、未来 24 小时和 7 天预报；专业图集保留 v1.6 的综合会商与原有产品。预报需要联网，尚未部署独立公开网址。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
+            --notes "AtmosScope v1.7.1：修复 Windows 安装后启动时缺失图标资源和 WebView2 写入受限目录导致的闪退。普通天气与专业图集继续在应用内加载，预报数据需要联网。Windows 未使用商业代码签名证书时，系统可能显示 SmartScreen 提示。"
