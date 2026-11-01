@@ -50,6 +50,7 @@ label {display:block;margin-bottom:10px;font-weight:650}
 .daily-list span {display:block;color:#c7e0e8;font-size:12px;line-height:1.7}
 .empty {color:#a5c4ce}
 footer {font-size:12px;line-height:1.6;padding:14px 0 8px}
+footer a {color:#9dddff}
 @media(max-width:900px) {.daily-list {grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:720px) {.weather-header {flex-direction:column;margin-bottom:25px}.weather-shell {padding:18px}.atlas-link {padding:10px 14px}.search-card,.forecast-card,.current-card {border-radius:17px}.search-card,.forecast-card {padding:18px}.daily-list {grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading {align-items:start;flex-direction:column;gap:5px}}
 @media(max-width:420px) {.search-row button {padding:10px 16px}.location-block {align-items:start;flex-direction:column}.current-card {padding:21px}.hourly-list li {flex-basis:120px}}
